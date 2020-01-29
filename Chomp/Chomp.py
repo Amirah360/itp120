@@ -38,7 +38,8 @@ the_layout = [
   "%.....%........P........%.....%",
   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"]
 
-class Maze 
+class Maze:
+
     def __init__(self):
         self.have_window = False     
         self.game_over = False      
@@ -120,3 +121,44 @@ class Wall(Immovable):
         dot_size = GRID_SIZE * 0.2
     
         Circle(self.screen_point, dot_size, color=WALL_COLOR, filled=True)
+
+    def object_at(self, point):
+        (x, y) = point
+
+        if y < 0 or y >= self.height:       
+            return Nothing()                
+
+        if x < 0 or x >= self.width:
+            return Nothing()
+
+        return self.map[y][x]
+
+    def is_a_wall(self):
+        return False 
+
+    def is_a_wall(self):
+        return True   
+
+    def draw(self):
+        dot_size = GRID_SIZE * 0.2              
+        Circle(self.screen_point, dot_size,
+               color = WALL_COLOR, filled = 1)   
+        (x, y) = self.place
+
+        #list of neighbors
+        neighbors = [(x + 1, y), (x - 1, y), (x, y + 1), (x, y - 1)]
+        # Checks each neighbor.
+        for neighbor in neighbors:
+            self.check_neighbor(neighbor)
+ 
+    def check_neighbor(self, neighbor):
+        maze = self.maze
+        object = maze.object_at(neighbor)           
+
+        if object.is_a_wall():                  
+            here = self.screen_point                 
+            there = maze.to_screen(neighbor)         
+            Line(here, there, color=WALL_COLOR, thickness=2) 
+
+#####INTRODUCING CHOMP
+
