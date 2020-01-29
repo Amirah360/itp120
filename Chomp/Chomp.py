@@ -244,4 +244,112 @@ class Chomp(Movable):
         move = self.furthest_move((move_x, move_y)) 
         self.move_by(move)                             
 
-  
+    def furthest_move(self, movement):
+        (move_x, move_y) = movement                     
+        (current_x, current_y) = self.place         
+        nearest = self.nearest_grid_point()             
+        (nearest_x, nearest_y) = nearest
+        maze = self.maze
+
+        if move_x > 0:                              
+            next_point = (nearest_x+1, nearest_y)
+            if maze.object_at(next_point).is_a_wall():
+                if current_x+move_x > nearest_x:         
+                    move_x = nearest_x - current_x      
+
+        elif move_x < 0:                                 
+            next_point = (nearest_x-1, nearest_y)
+            if maze.object_at(next_point).is_a_wall():
+                if current_x+move_x < nearest_x:        
+                    move_x = nearest_x - current_x       
+
+        if move_y > 0:                                    
+            next_point = (nearest_x, nearest_y+1)
+            if maze.object_at(next_point).is_a_wall():
+                if current_y+move_y > nearest_y:         
+                    move_y = nearest_y - current_y      
+
+        elif move_y < 0:                                
+            next_point = (nearest_x, nearest_y-1)
+            if maze.object_at(next_point).is_a_wall():
+                if current_y+move_y < nearest_y:        
+                    move_y = nearest_y - current_y 
+
+        if move_x > self.speed:                 
+            move_x = self.speed
+        elif move_x < -self.speed:
+            move_x = -self.speed
+
+        if move_y > self.speed:
+            move_y = self.speed
+        elif move_y < -self.speed:
+            move_y = -self.speed
+
+        return (move_x, move_y)  
+
+    def nearest_grid_point(self):
+        (current_x, current_y) = self.place
+        grid_x = int(current_x + 0.5)        
+        grid_y = int(current_y + 0.5)       
+        return (grid_x, grid_y)   
+
+CHOMP_COLOR = color.YELLOW                   
+CHOMP_SIZE = GRID_SIZE * 0.8                 
+CHOMP_SPEED = 0.25                      
+
+    def __init__(self, maze, point):
+        self.direction = 0                   
+        Movable.__init__(self, maze, point,  
+                         CHOMP_SPEED)
+
+    def draw(self):
+        maze = self.maze
+        screen_point = maze.to_screen(self.place)
+        angle = self.get_angle()                
+        endpoints = (self.direction + angle,        
+                     self.direction + 360 - angle)
+        self.body = Arc(screen_point, CHOMP_SIZE,   
+                        endpoints[0], endpoints[1],
+                        filled=True, color=CHOMP_COLOR)
+
+    def get_angle(self):
+        (x, y) = self.place                                 
+        (nearest_x, nearest_y) = (self.nearest_grid_point())
+        distance = (abs(x-nearest_x) + abs(y-nearest_y))      
+        return 1 + 90*distance                              
+
+    def make_object(self, point, character):
+        (x, y) = point
+        if character == '%':                    
+            self.map[y][x] = Wall(self, point)
+        elif character == 'P':                  
+            chomp = Chomp(self, point)
+            self.movables.append(chomp)
+    def set_layout(self, layout):
+        height = len(layout)             
+        width = len(layout[0])
+        self.make_window(width, height)
+        self.make_map(width, height)
+        self.movables = []              
+
+        max_y = height - 1
+        for x in range(width):           
+            for y in range(height):
+                char = layout[max_y - y][x]
+                self.make_object((x, y), char)
+
+        for movable in self.movables:
+            movable.draw()
+
+    def done(self):
+        end_graphics()                  
+        self.map = []                    
+        self.movables = []      
+
+    def play(self):
+        for movable in self.movables:   
+            movable.move()
+        update_when('next_tick')
+
+#####FOOD, GLORIOUS FOOD!
+
