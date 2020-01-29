@@ -38,6 +38,40 @@ the_layout = [
   "%.....%........P........%.....%",
   "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"]
 
+la_layout = [
+  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",    
+  "%.....%.................%.....%",
+  "%o%%%.%.................%.%%%o%",
+  "%.%.....%......%......%.....%.%",
+  "%.....................%.%%%...%",
+  "%%%.%...%.%.........%.%...%.%%%",
+  "%...%.%%%.%.%%% %%%.%.%%%.%...%",
+  "%.%%%.......%GG GG%.......%%%.%",
+  "%...%.%%%.%.%%%%%%%.%.%.%.%...%",
+  "%%%.%...%.%.........%.%...%.%%%",
+  "%...%.................%.%%%...%",
+  "%.%.....%......%......%.....%.%",
+  "%o%%%.%.%%%.......%.....%.%%%o%",
+  "%.....%........P........%.....%",
+  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"]
+
+Hourglass = [
+  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%",    
+  "%.....%.................%.....%",
+  "%o%%%.%.%.............%.%.%%%o%",
+  "%.%.....%.............%.....%.%",
+  "%...%%%.%.............%.%%%...%",
+  "%%%.%...%.%.........%.%...%.%%%",
+  "%...%.%%%.%.%%% %%%.%.%%%.%...%",
+  "%.%%%.......%GG GG%.......%%%.%",
+  "%...%.%%%.%.%%%%%%%.%.%%%.%...%",
+  "%%%.%...%.%.........%.%...%.%%%",
+  "%...%%%.%.............%.%%%...%",
+  "%.%.....%.............%.....%.%",
+  "%o%%%.%.%%%.........%%%.%.%%%o%",
+  "%.....%........P........%.....%",
+  "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"]
+
 class Maze:
 
     def __init__(self):
@@ -162,3 +196,52 @@ class Wall(Immovable):
 
 #####INTRODUCING CHOMP
 
+class Movable:
+    def __init__(self, maze, point, speed):
+        self.maze = maze                      
+        self.place = point                  
+        self.speed = speed
+#Aka Pacman
+class Chomp(Movable):
+    def __init__(self, maze, point):
+        Movable.__init__(self, maze, point, 
+                         CHOMP_SPEED)
+
+    def move(self):
+        keys = keys_pressed()
+        if   'left' in keys: self.move_left()   
+        elif 'right' in keys: self.move_right() 
+        elif 'up' in keys: self.move_up()
+        elif 'down' in keys: self.move_down()  
+
+    def move_left(self):
+        self.try_move((-1, 0))
+
+    def move_right(self):
+        self.try_move((1, 0))
+
+    def move_up(self):
+        self.try_move((0, 1))
+
+    def move_down(self):
+        self.try_move((0, -1))
+
+    def try_move(self, move):
+        (move_x, move_y) = move
+        (current_x, current_y) = self.place
+        (nearest_x, nearest_y) = (self.nearest_grid_point())
+
+        if self.furthest_move(move) == (0, 0):  
+            return
+        if move_x != 0 and current_y != nearest_y:  
+            move_x = 0                                 
+            move_y = nearest_y - current_y          
+
+        elif move_y != 0 and current_x != nearest_x:   
+            move_y = 0                                  
+            move_x = nearest_x - current_x          
+
+        move = self.furthest_move((move_x, move_y)) 
+        self.move_by(move)                             
+
+  
